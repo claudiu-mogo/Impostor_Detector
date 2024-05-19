@@ -26,4 +26,10 @@ char hexaKeys[ROWS][COLS] = {
 byte rowPins[ROWS] = {6, 7, 8, 9};     // connect to the row pinouts of the keypad
 byte colPins[COLS] = {A0, A1, A2, A3}; // connect to the column pinouts of the keypad
 
+// SEPARATE BUTTONS
+const int button1 = 3;
+const int button2 = 2;
+unsigned long lastDebounceTime = 0; // Variable to store the last time the output was toggled
+unsigned long debounceDelay = 1000; // Delay time in milliseconds for debouncing
+
 #endif // MYPINS_H

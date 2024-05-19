@@ -41,6 +41,28 @@ void random_led_sequence()
     }
 }
 
+void button1ISR()
+{
+    if ((millis() - lastDebounceTime) > debounceDelay)
+    {
+        led_time -= 200;
+        led_time = max(100, led_time);
+        Serial.println(led_time);
+        lastDebounceTime = millis(); // Update last debounce time
+    }
+}
+
+void button2ISR()
+{
+    if ((millis() - lastDebounceTime) > debounceDelay)
+    {
+        led_time += 200;
+        led_time = min(2000, led_time);
+        Serial.println(led_time);
+        lastDebounceTime = millis(); // Update last debounce time
+    }
+}
+
 void setup()
 {
     // initialize sensor
@@ -67,6 +89,13 @@ void setup()
 
     // put time seed
     srand(time(0));
+
+    // add interrupts to difficulty buttons
+    pinMode(button1, INPUT);
+    attachInterrupt(digitalPinToInterrupt(button1), button1ISR, FALLING);
+
+    pinMode(button2, INPUT);
+    attachInterrupt(digitalPinToInterrupt(button2), button2ISR, FALLING);
 }
 
 void loop()
