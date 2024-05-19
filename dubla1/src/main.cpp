@@ -63,6 +63,25 @@ void button2ISR()
     }
 }
 
+void my_interrupt()
+{
+    sei();
+    EICRA = 0;
+    EICRA |= (1 << ISC11) | (1 << ISC01);
+    EIMSK = 0;
+    EIMSK |= (1 << INT1) | (1 << INT0);
+}
+
+ISR(INT0_vect)
+{
+    button2ISR();
+}
+
+ISR(INT1_vect)
+{
+    button1ISR();
+}
+
 void setup()
 {
     // initialize sensor
@@ -90,12 +109,13 @@ void setup()
     // put time seed
     srand(time(0));
 
+    my_interrupt();
     // add interrupts to difficulty buttons
     pinMode(button1, INPUT);
-    attachInterrupt(digitalPinToInterrupt(button1), button1ISR, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(button1), button1ISR, FALLING);
 
     pinMode(button2, INPUT);
-    attachInterrupt(digitalPinToInterrupt(button2), button2ISR, FALLING);
+    // attachInterrupt(digitalPinToInterrupt(button2), button2ISR, FALLING);
 }
 
 void loop()
