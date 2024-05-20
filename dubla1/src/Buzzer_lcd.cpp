@@ -19,7 +19,7 @@ void small_buzz()
 
 void big_buzz()
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 7; i++)
     {
         tone(buzzerPin, 1500, 200);
         delay(500);

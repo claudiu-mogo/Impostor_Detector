@@ -14,7 +14,7 @@ CRGB leds[NUM_LEDS];
 // BUTTON MATRIX
 const byte ROWS = 4; // four rows
 const byte COLS = 4; // four columns
-// define the cymbols on the buttons of the keypads
+// define the symbols on the buttons of the keypads
 char hexaKeys[ROWS][COLS] = {
     {-1, 4, 8, 12},
     {1, 5, 9, 13},

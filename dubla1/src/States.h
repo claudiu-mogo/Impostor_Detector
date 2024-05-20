@@ -8,9 +8,11 @@
 
 int current_state = CHECK_DISTANCE;
 int led_time = 1000;
+int pop_up_led_time = 300;
 int current_leds[10];
 int level = 1;
 int array_index = 0;
-int max_level = 4;
+int max_level = 3;
+bool level_flag;
 
 #endif

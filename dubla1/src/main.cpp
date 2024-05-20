@@ -45,6 +45,14 @@ void button1ISR()
 {
     if ((millis() - lastDebounceTime) > debounceDelay)
     {
+        if (current_state == CHECK_DISTANCE)
+        {
+            // update total number of levels
+            max_level = min(7, max_level + 1);
+            level_flag = true;
+            lastDebounceTime = millis(); // Update last debounce time
+            return;
+        }
         led_time -= 200;
         led_time = max(100, led_time);
         Serial.println(led_time);
@@ -56,6 +64,14 @@ void button2ISR()
 {
     if ((millis() - lastDebounceTime) > debounceDelay)
     {
+        if (current_state == CHECK_DISTANCE)
+        {
+            // update total number of levels
+            max_level = max(1, max_level - 1);
+            level_flag = true;
+            lastDebounceTime = millis(); // Update last debounce time
+            return;
+        }
         led_time += 200;
         led_time = min(2000, led_time);
         Serial.println(led_time);
@@ -102,6 +118,7 @@ void setup()
     // initialize lcd
     init_lcd();
     display_text_lcd("START GAME!");
+    level_flag = false;
 
     // initialize servo
     myservo.attach(10);
@@ -122,11 +139,20 @@ void loop()
 {
     if (current_state == CHECK_DISTANCE)
     {
+        if (level_flag)
+        {
+            char current_str[20];
+            sprintf(current_str, "LEVELS: %d", max_level);
+            display_text_lcd(current_str);
+            level_flag = false;
+            delay(1000);
+        }
         display_text_lcd("START GAME!");
         long dist = get_average_distance();
         // Serial.println(dist);
         if (dist <= 3.5)
         {
+            debounceDelay = 500;
             current_state = BLINK_LEDS;
         }
     }
@@ -150,24 +176,40 @@ void loop()
             customKey = max(0, customKey);
             if (customKey == current_leds[array_index])
             {
+                // mark the led as correct
+                leds[customKey] = CRGB::Red;
+                FastLED.show();
+                delay(pop_up_led_time);
+                leds[customKey] = CRGB::Black;
+                FastLED.show();
+
                 array_index++;
                 if (array_index == level)
                 {
                     array_index = 0;
                     current_state = BLINK_LEDS;
                     level++;
-                    if (level >= max_level)
+                    if (level > max_level)
                     {
                         current_state = GG;
+                        level = 1;
                     }
                 }
                 small_buzz();
             }
             else
             {
+                // mark the led as wrong
+                leds[customKey] = CRGB::Green;
+                FastLED.show();
+                delay(pop_up_led_time);
+                leds[customKey] = CRGB::Black;
+                FastLED.show();
+
                 array_index = 0;
                 level = 1;
                 big_buzz();
+                debounceDelay = 1000;
                 current_state = CHECK_DISTANCE;
             }
             // Serial.println(customKey);
@@ -192,6 +234,7 @@ void loop()
             delay(15);
         }
         sing();
+        debounceDelay = 1000;
         current_state = CHECK_DISTANCE;
     }
 }
