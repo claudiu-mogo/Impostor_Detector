@@ -14,18 +14,19 @@ long read_distance()
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
     duration = pulseIn(echoPin, HIGH);
-    // Calculating the distance
+    // compute the distance
     distance = duration * 0.034 / 2;
 
-    // Return distance only if it's within a realistic range
+    // return distance only if it is within a realistic range
     if (distance >= 1 && distance <= 400)
     {
         return distance;
     }
-    // Return an invalid distance if the measurement is out of range
+    // return an invalid distance if the measurement is out of range
     return -1;
 }
 
+// compute the average of 10 consecutive measurements
 long get_average_distance()
 {
     long sum = 0;
@@ -44,9 +45,9 @@ long get_average_distance()
 
     if (validReadings == 0)
     {
-        return -1; // No valid readings
+        return 100; // no valid readings
     }
 
-    // Calculate the avg value
+    // calculate the avg value
     return sum / validReadings;
 }

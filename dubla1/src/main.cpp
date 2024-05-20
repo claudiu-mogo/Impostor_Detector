@@ -13,8 +13,10 @@
 Servo myservo; // create Servo object to control a servo
 int pos = 0;
 
+// instatiate button matrix
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 
+// safety measure -- close all leds
 void clear_leds()
 {
     for (int i = 0; i < NUM_LEDS; i++)
@@ -24,6 +26,7 @@ void clear_leds()
     FastLED.show();
 }
 
+// generate a random sequence of length level
 void random_led_sequence()
 {
     display_text_lcd("WATCH!");
@@ -41,6 +44,7 @@ void random_led_sequence()
     }
 }
 
+// interrupt for "increased difficulty"
 void button1ISR()
 {
     if ((millis() - lastDebounceTime) > debounceDelay)
@@ -53,6 +57,8 @@ void button1ISR()
             lastDebounceTime = millis(); // Update last debounce time
             return;
         }
+
+        // during the game, change up times for the leds
         led_time -= 200;
         led_time = max(100, led_time);
         Serial.println(led_time);
@@ -60,6 +66,7 @@ void button1ISR()
     }
 }
 
+// interrupt for "decreased difficulty"
 void button2ISR()
 {
     if ((millis() - lastDebounceTime) > debounceDelay)
@@ -72,6 +79,8 @@ void button2ISR()
             lastDebounceTime = millis(); // Update last debounce time
             return;
         }
+
+        // during the game, change up times for the leds
         led_time += 200;
         led_time = min(2000, led_time);
         Serial.println(led_time);
@@ -79,6 +88,7 @@ void button2ISR()
     }
 }
 
+// set interrupts on FALLING
 void my_interrupt()
 {
     sei();
@@ -129,16 +139,14 @@ void setup()
     my_interrupt();
     // add interrupts to difficulty buttons
     pinMode(button1, INPUT);
-    // attachInterrupt(digitalPinToInterrupt(button1), button1ISR, FALLING);
-
     pinMode(button2, INPUT);
-    // attachInterrupt(digitalPinToInterrupt(button2), button2ISR, FALLING);
 }
 
 void loop()
 {
     if (current_state == CHECK_DISTANCE)
     {
+        // got an interrupt for changing max_level
         if (level_flag)
         {
             char current_str[20];
@@ -149,17 +157,19 @@ void loop()
         }
         display_text_lcd("START GAME!");
         long dist = get_average_distance();
-        // Serial.println(dist);
+
+        // check threshold for distance
         if (dist <= 3.5)
         {
-            debounceDelay = 500;
+            debounceDelay = MIDGAME_DEBOUNCE_DELAY;
             current_state = BLINK_LEDS;
         }
     }
     else if (current_state == BLINK_LEDS)
     {
+        // generate sequence and go to REPLICATE
         display_text_lcd("BEWARE!");
-        delay(3000);
+        delay(2000);
         random_led_sequence();
         current_state = REPLICATE;
         display_text_lcd("WAIT!");
@@ -173,6 +183,7 @@ void loop()
         char customKey = customKeypad.getKey();
         if (customKey)
         {
+            // compromise for the validity of the above condition
             customKey = max(0, customKey);
             if (customKey == current_leds[array_index])
             {
@@ -183,14 +194,17 @@ void loop()
                 leds[customKey] = CRGB::Black;
                 FastLED.show();
 
+                // go to the next element
                 array_index++;
                 if (array_index == level)
                 {
+                    // finished level
                     array_index = 0;
                     current_state = BLINK_LEDS;
                     level++;
                     if (level > max_level)
                     {
+                        // finished game
                         current_state = GG;
                         level = 1;
                     }
@@ -206,13 +220,13 @@ void loop()
                 leds[customKey] = CRGB::Black;
                 FastLED.show();
 
+                // reset the game
                 array_index = 0;
                 level = 1;
                 big_buzz();
-                debounceDelay = 1000;
+                debounceDelay = INITIAL_DEBOUNCE_DELAY;
                 current_state = CHECK_DISTANCE;
             }
-            // Serial.println(customKey);
         }
         else
         {
@@ -221,6 +235,7 @@ void loop()
     }
     else if (current_state == GG)
     {
+        // done game, open up the prize
         display_text_lcd("GG!");
         for (pos = 0; pos <= 180; pos += 1)
         { // goes from 0 degrees to 180 degrees
@@ -234,7 +249,9 @@ void loop()
             delay(15);
         }
         sing();
-        debounceDelay = 1000;
+
+        // restart game if needed
+        debounceDelay = INITIAL_DEBOUNCE_DELAY;
         current_state = CHECK_DISTANCE;
     }
 }

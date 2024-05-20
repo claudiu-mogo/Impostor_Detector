@@ -1,3 +1,9 @@
+/*
+    THIS WAS MY ORIGINAL MAIN, USED TO CHECK THAT ALL COMPONENTS WORK INDIVIDUALLY
+
+    YOU CAN IGNORE THIS FILE, IT IS ALL COMMENTED TO AVOID THE CONFLICTS
+*/
+
 // #include <Arduino.h>
 // #include <FastLED.h>
 // #include <Keypad.h> //use the Keypad libraries
