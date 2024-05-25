@@ -11,7 +11,7 @@
 
 // SERVO
 Servo myservo; // create Servo object to control a servo
-int pos = 0;
+int pos;
 
 // instatiate button matrix
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
@@ -132,6 +132,8 @@ void setup()
 
     // initialize servo
     myservo.attach(10);
+    pos = 0;
+    myservo.write(pos);
 
     // put time seed
     srand(time(0));
